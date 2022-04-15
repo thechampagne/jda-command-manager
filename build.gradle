@@ -1,0 +1,84 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.5.31'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'io.github.thexxiv'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+}
+
+
+dependencies {
+    implementation("net.dv8tion:JDA:4.4.0_350")
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+publishing {
+    repositories {
+        maven {
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = project.findProperty('USERNAME')
+                password = project.findProperty('PASSWORD')
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            artifact jar
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'jda-command-manager'
+                description = 'JDA command manager'
+                url = 'https://github.com/thechampagne/jda-command-manager'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/thechampagne/jda-command-manager/blob/main/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'XXIV'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/thechampagne/jda-command-manager.git'
+                    developerConnection = 'scm:git:ssh://github.com/thechampagne/jda-command-manager.git'
+                    url = 'https://github.com/thechampagne/jda-command-manager'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.maven
+}
